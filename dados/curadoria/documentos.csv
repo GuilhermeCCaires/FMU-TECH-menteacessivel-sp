@@ -1,0 +1,7 @@
+chave;documento;obrigatorio;observacao
+padrao;Documento com foto (RG ou CNH);1;Se não tiver, vá mesmo assim e explique na recepção
+padrao;CPF ou Cartão Nacional de Saúde (Cartão SUS);1;O número do Cartão SUS aparece no aplicativo Meu SUS Digital
+padrao;Comprovante de residência;1;O CAPS atende quem mora na sua área de abrangência
+padrao;Encaminhamento da UBS;0;Em geral não é exigido no CAPS: confirme por telefone
+padrao;Receitas e laudos que você já tenha;0;Ajudam a equipe a conhecer seu histórico
+padrao;Em situação de crise, nenhum documento é necessário para ser acolhido;0;

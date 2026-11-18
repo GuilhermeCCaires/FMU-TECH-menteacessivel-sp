@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Painel de cobertura — MenteAcessível SP</title>
+  <link rel="icon" href="/icone.svg" type="image/svg+xml">
+  <link rel="manifest" href="/manifest.webmanifest">
+  <meta name="theme-color" content="#2a6f6b">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
+  <link rel="stylesheet" href="/estilo.css">
+  <style>
+    .conteudo { max-width: 1200px; margin: 0 auto; padding: 20px 16px; }
+    .conteudo > h1 { font-size: 1.5rem; margin: 0 0 4px; }
+    .subtitulo { color: var(--texto-2); margin: 0 0 20px; }
+    .kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 16px; }
+    .kpi { background: var(--superficie); border: 1px solid var(--borda); border-radius: var(--raio); padding: 14px 16px; }
+    .kpi .rotulo { color: var(--texto-2); font-size: .85rem; }
+    .kpi .valor { font-size: 1.9rem; font-weight: 650; margin: 2px 0; font-variant-numeric: tabular-nums; }
+    .kpi .nota { color: var(--texto-2); font-size: .82rem; }
+    .grade { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .grafico { position: relative; height: 420px; }
+    #mapa-cobertura { height: 520px; border-radius: 8px; }
+    .legenda-mapa { display: flex; flex-wrap: wrap; gap: 12px; font-size: .85rem; margin-top: 10px; color: var(--texto-2); }
+    .legenda-mapa i { display: inline-block; width: 14px; height: 14px; border-radius: 3px; margin-right: 6px; vertical-align: -2px; }
+    table { width: 100%; border-collapse: collapse; font-size: .9rem; }
+    th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--borda); }
+    th { cursor: pointer; user-select: none; color: var(--texto-2); font-weight: 600; white-space: nowrap; }
+    td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+    .tabela-rolagem { max-height: 520px; overflow: auto; }
+    .filtros { display: flex; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
+    .filtros input, .filtros select { min-height: 40px; padding: 6px 10px; border: 1px solid var(--borda); border-radius: 8px; }
+    @media (max-width: 860px) { .kpis { grid-template-columns: 1fr 1fr; } .grade { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <header class="topo">
+    <a class="marca" href="/"><img src="/icone.svg" alt=""><div><strong>MenteAcessível SP</strong><span>Painel de cobertura da rede de saúde mental</span></div></a>
+    <nav><a class="botao pequeno" href="/">Início</a></nav>
+  </header>
+
+  <main class="conteudo">
+    <h1>Onde falta atendimento em saúde mental em SP</h1>
+    <p class="subtitulo" id="subtitulo">Carregando dados...</p>
+
+    <section class="kpis" aria-label="Indicadores do estado">
+      <div class="kpi"><div class="rotulo">Cobertura CAPS no estado</div><div class="valor" id="kpi-indice">–</div><div class="nota" id="kpi-classe">por 100 mil habitantes</div></div>
+      <div class="kpi"><div class="rotulo">CAPS cadastrados</div><div class="valor" id="kpi-caps">–</div><div class="nota" id="kpi-caps-nota"></div></div>
+      <div class="kpi"><div class="rotulo">Municípios sem nenhum CAPS</div><div class="valor" id="kpi-sem">–</div><div class="nota" id="kpi-sem-nota"></div></div>
+      <div class="kpi"><div class="rotulo">Municípios com déficit pelo porte</div><div class="valor" id="kpi-deficit">–</div><div class="nota">falta ao menos uma modalidade indicada</div></div>
+    </section>
+
+    <section class="cartao">
+      <h2>Cobertura de CAPS por município</h2>
+      <div id="mapa-cobertura" role="img" aria-label="Mapa coroplético da cobertura de CAPS por município. A tabela abaixo traz os mesmos valores."></div>
+      <div class="legenda-mapa" id="legenda-mapa"></div>
+      <p class="dica">Indicador do Ministério da Saúde: CAPS I vale 0,5; CAPS III e AD III valem 1,5; os demais, 1. Soma dividida pela população e multiplicada por 100 mil. Mede a existência do serviço, não a qualidade nem a fila de espera.</p>
+    </section>
+
+    <div class="grade">
+      <section class="cartao">
+        <h2>As 20 regiões com menor cobertura</h2>
+        <p class="dica" style="margin-top:-6px">Regiões imediatas do IBGE. Linha tracejada: 0,70, limite da cobertura “muito boa”.</p>
+        <div class="grafico"><canvas id="grafico-regioes" aria-label="Gráfico de barras das regiões com menor cobertura"></canvas></div>
+      </section>
+      <section class="cartao">
+        <h2>Cidades grandes com cobertura baixa</h2>
+        <p class="dica" style="margin-top:-6px">Cada ponto é um município. Eixo horizontal em escala logarítmica.</p>
+        <div class="grafico"><canvas id="grafico-dispersao" aria-label="Gráfico de dispersão de população e cobertura"></canvas></div>
+      </section>
+    </div>
+
+    <section class="cartao">
+      <h2>Tabela por município</h2>
+      <div class="filtros">
+        <label class="visualmente-oculto" for="filtro-nome">Filtrar município</label>
+        <input id="filtro-nome" placeholder="Filtrar por nome">
+        <label class="visualmente-oculto" for="filtro-classe">Classificação</label>
+        <select id="filtro-classe"><option value="">Todas as classificações</option></select>
+        <label><input type="checkbox" id="filtro-deficit"> Só com déficit</label>
+      </div>
+      <div class="tabela-rolagem">
+        <table>
+          <thead><tr>
+            <th data-col="nome">Município</th>
+            <th data-col="regiao">Região</th>
+            <th data-col="populacao" class="num">População</th>
+            <th data-col="caps_total" class="num">CAPS</th>
+            <th data-col="indice" class="num">Índice</th>
+            <th data-col="classificacao">Classificação</th>
+            <th data-col="faltam">Faltam (pelo porte)</th>
+            <th data-col="buscas_app" class="num">Buscas no app</th>
+          </tr></thead>
+          <tbody id="tabela-municipios"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="cartao">
+      <h2>Demanda registrada no app</h2>
+      <p class="dica" style="margin-top:-6px">Buscas anônimas: guardamos só o município, o perfil e se havia serviço a menos de 30 km.</p>
+      <div class="grade">
+        <div class="grafico" style="height:300px"><canvas id="grafico-demanda" aria-label="Buscas por dia"></canvas></div>
+        <div class="tabela-rolagem" style="max-height:300px">
+          <table><thead><tr><th>Município</th><th class="num">Buscas</th><th class="num">Sem serviço a 30 km</th></tr></thead>
+            <tbody id="tabela-demanda"></tbody></table>
+        </div>
+      </div>
+    </section>
+
+    <p class="rodape" id="fontes"></p>
+  </main>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="/painel.js"></script>
+</body>
+</html>

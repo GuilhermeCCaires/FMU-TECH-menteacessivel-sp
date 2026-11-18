@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>MenteAcessível SP — Saúde mental gratuita pelo SUS</title>
+  <meta name="description" content="Encontre o CAPS, a UBS ou o serviço 24h mais próximo no Estado de São Paulo.">
+  <meta name="theme-color" content="#2a6f6b">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="MenteAcessível">
+  <meta name="format-detection" content="telephone=no">
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="icon" href="/icone.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <link rel="stylesheet" href="/estilo.css">
+</head>
+<body class="pagina-inicio">
+  <header class="topo">
+    <a class="marca" href="/" aria-current="page">
+      <img src="/icone.svg" alt="">
+      <div><strong>MenteAcessível SP</strong><span>Saúde mental gratuita pelo SUS</span></div>
+    </a>
+    <nav><a class="botao pequeno so-computador" href="/painel">Painel</a></nav>
+  </header>
+
+  <main class="inicio">
+    <section class="boas-vindas">
+      <h1>Encontre atendimento em saúde mental perto de você</h1>
+      <p>Gratuito pelo SUS, em todo o Estado de São Paulo. Sem cadastro.</p>
+    </section>
+
+    <!-- Crise: sempre o primeiro, com ligação direta -->
+    <section class="cartao cartao-crise" aria-labelledby="titulo-crise">
+      <h2 id="titulo-crise">Precisa de ajuda agora?</h2>
+      <p>Se você pensa em se machucar ou corre perigo, ligue. É gratuito, 24 horas.</p>
+      <div class="ligacoes">
+        <a class="botao crise" href="tel:188"><span class="numero">188</span> CVV · apoio emocional</a>
+        <a class="botao crise" href="tel:192"><span class="numero">192</span> SAMU · emergência</a>
+      </div>
+      <a class="link-seta" href="/buscar?perfil=crise&amp;acao=localizacao">Ver o serviço 24h mais próximo</a>
+    </section>
+
+    <!-- Busca principal -->
+    <section class="cartao" aria-labelledby="titulo-busca">
+      <h2 id="titulo-busca">Onde ser atendido</h2>
+      <a class="botao primario botao-largo" href="/buscar?acao=localizacao">
+        <svg aria-hidden="true" viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M12 2a7 7 0 0 0-7 7c0 5.2 7 13 7 13s7-7.8 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z"/></svg>
+        Usar minha localização
+      </a>
+      <form class="linha-busca" action="/buscar" method="get">
+        <label for="q" class="visualmente-oculto">CEP, endereço ou cidade</label>
+        <input id="q" name="q" autocomplete="postal-code" placeholder="CEP, endereço ou cidade" required>
+        <button class="botao" type="submit">Buscar</button>
+      </form>
+    </section>
+
+    <!-- Atalhos por perfil -->
+    <section aria-labelledby="titulo-perfis">
+      <h2 id="titulo-perfis" class="titulo-secao">Para quem é o atendimento?</h2>
+      <div class="grade-perfis">
+        <a class="perfil-atalho" href="/buscar?perfil=adulto&amp;acao=localizacao">
+          <svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="12" cy="7" r="4" fill="currentColor"/><path fill="currentColor" d="M4 21a8 8 0 0 1 16 0z"/></svg>
+          <strong>Adulto</strong><span>Sofrimento intenso, ansiedade, depressão</span>
+        </a>
+        <a class="perfil-atalho" href="/buscar?perfil=infantojuvenil&amp;acao=localizacao">
+          <svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="8" cy="8" r="3.2" fill="currentColor"/><circle cx="17" cy="10" r="2.4" fill="currentColor"/><path fill="currentColor" d="M2 21a6 6 0 0 1 12 0zm11 0a4.5 4.5 0 0 1 9 0z"/></svg>
+          <strong>Criança ou adolescente</strong><span>CAPS infantojuvenil</span>
+        </a>
+        <a class="perfil-atalho" href="/buscar?perfil=alcool_drogas&amp;acao=localizacao">
+          <svg aria-hidden="true" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2 4 5v6c0 5 3.4 9.4 8 11 4.6-1.6 8-6 8-11V5zm-1 14-4-4 1.4-1.4 2.6 2.6 5.6-5.6L18 9z"/></svg>
+          <strong>Álcool e outras drogas</strong><span>CAPS AD, sem julgamento</span>
+        </a>
+        <a class="perfil-atalho" href="/buscar?triagem=1">
+          <svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2"/><path fill="currentColor" d="M11 17h2v2h-2zm1-12a4 4 0 0 0-4 4h2a2 2 0 1 1 3.3 1.5c-1.2 1-2.3 1.8-2.3 3.5h2c0-1 .7-1.5 1.6-2.3A4 4 0 0 0 12 5z"/></svg>
+          <strong>Não sei qual escolher</strong><span>3 perguntas rápidas</span>
+        </a>
+      </div>
+    </section>
+
+    <!-- Outras opções -->
+    <nav class="cartao lista-menu" aria-label="Mais opções">
+      <a href="/buscar?tipos=1"><strong>O que é um CAPS?</strong><span>Os serviços de saúde mental do SUS</span></a>
+      <a href="/painel"><strong>Onde falta atendimento</strong><span>Painel de cobertura por município</span></a>
+      <a href="/sobre"><strong>Sobre os dados e privacidade</strong><span>De onde vêm as informações</span></a>
+      <button type="button" id="instalar" hidden><strong>Instalar no celular</strong><span>Acesse direto da tela inicial</span></button>
+    </nav>
+
+    <p class="rodape" id="rodape-inicio">
+      Este app orienta e não substitui atendimento profissional. Dados do CNES (Ministério da Saúde) e do IBGE.
+    </p>
+  </main>
+
+  <script src="/inicio.js"></script>
+</body>
+</html>

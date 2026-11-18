@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>MenteAcessível SP — Encontre atendimento gratuito em saúde mental</title>
+  <meta name="description" content="Encontre o CAPS, a UBS ou o serviço 24h mais próximo no Estado de São Paulo.">
+  <meta name="theme-color" content="#2a6f6b">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="MenteAcessível">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="format-detection" content="telephone=no">
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="icon" href="/icone.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
+  <link rel="stylesheet" href="/estilo.css">
+</head>
+<body>
+  <header class="topo">
+    <a class="marca" href="/">
+      <img src="/icone.svg" alt="">
+      <div><strong>MenteAcessível SP</strong><span>Saúde mental gratuita pelo SUS</span></div>
+    </a>
+    <nav>
+      <a class="botao pequeno so-computador" href="/">Início</a>
+      <a class="botao pequeno so-computador" href="/painel">Painel</a>
+      <button class="botao crise" id="botao-crise" type="button">Estou em crise</button>
+    </nav>
+  </header>
+
+  <main class="principal">
+    <section class="painel-lateral" aria-label="Busca de serviços">
+      <div class="cartao">
+        <h2>Onde buscar ajuda perto de você</h2>
+        <fieldset class="perfis" id="perfis">
+          <legend>Para quem é o atendimento?</legend>
+          <label><input type="radio" name="perfil" value="todos" checked><span>Qualquer serviço</span></label>
+          <label><input type="radio" name="perfil" value="adulto"><span>Adulto</span></label>
+          <label><input type="radio" name="perfil" value="infantojuvenil"><span>Criança ou adolescente</span></label>
+          <label><input type="radio" name="perfil" value="alcool_drogas"><span>Álcool e drogas</span></label>
+          <label><input type="radio" name="perfil" value="crise"><span>Crise agora (24h)</span></label>
+        </fieldset>
+
+        <button class="botao primario" id="usar-localizacao" type="button" style="width:100%;justify-content:center">
+          Usar minha localização
+        </button>
+        <p class="dica">Sua localização é usada só para esta busca e não é guardada.</p>
+
+        <form class="linha-busca" id="form-endereco" style="margin-top:10px">
+          <label for="endereco" class="visualmente-oculto">CEP, endereço ou cidade</label>
+          <input id="endereco" list="lista-municipios" autocomplete="off"
+                 placeholder="CEP, endereço ou cidade de SP">
+          <button class="botao" type="submit">Buscar</button>
+        </form>
+        <datalist id="lista-municipios"></datalist>
+
+        <div class="acoes">
+          <button class="botao pequeno" id="abrir-triagem" type="button">Não sei qual escolher</button>
+          <button class="botao pequeno" id="abrir-tipos" type="button">O que é um CAPS?</button>
+          <button class="botao pequeno" id="instalar" type="button" hidden>Instalar no celular</button>
+        </div>
+      </div>
+
+      <div id="status" role="status" aria-live="polite"></div>
+      <ol class="resultados" id="resultados" aria-label="Serviços encontrados"></ol>
+
+      <p class="rodape">
+        Este app orienta e não substitui atendimento profissional. Dados do
+        <abbr title="Cadastro Nacional de Estabelecimentos de Saúde">CNES</abbr> e do IBGE.
+        Confirme horários por telefone. <a href="/sobre">Sobre os dados</a> ·
+        <a href="/painel">Painel de cobertura</a>
+      </p>
+    </section>
+    <div id="mapa" role="region" aria-label="Mapa dos serviços (a lista ao lado traz as mesmas informações)"></div>
+  </main>
+
+  <!-- Crise -->
+  <dialog id="dialogo-crise" aria-labelledby="titulo-crise">
+    <div class="dialogo-corpo crise-topo">
+      <button class="fechar" data-fechar aria-label="Fechar">&times;</button>
+      <h2 id="titulo-crise">Você não está sozinho(a)</h2>
+      <p>Se você está pensando em se machucar ou corre perigo agora, fale com alguém neste momento:</p>
+      <div class="contato-crise">
+        <div><strong>CVV — 188</strong><br><small>Apoio emocional, 24h, ligação gratuita. Também por chat em cvv.org.br</small></div>
+        <a class="botao crise" href="tel:188">Ligar 188</a>
+      </div>
+      <div class="contato-crise">
+        <div><strong>SAMU — 192</strong><br><small>Emergência médica, 24h</small></div>
+        <a class="botao crise" href="tel:192">Ligar 192</a>
+      </div>
+      <div class="contato-crise">
+        <div><strong>Serviço 24h mais próximo</strong><br><small>CAPS III, CAPS AD III ou pronto atendimento</small></div>
+        <button class="botao" id="crise-proximo" type="button">Mostrar</button>
+      </div>
+      <p class="dica">Em situação de crise, nenhum documento é necessário para ser acolhido.</p>
+    </div>
+  </dialog>
+
+  <!-- Ficha da unidade -->
+  <dialog id="dialogo-ficha" aria-labelledby="ficha-nome">
+    <div class="dialogo-corpo" id="ficha-conteudo"></div>
+  </dialog>
+
+  <!-- Triagem orientativa -->
+  <dialog id="dialogo-triagem" aria-labelledby="titulo-triagem">
+    <form class="dialogo-corpo" id="form-triagem" method="dialog">
+      <button class="fechar" data-fechar aria-label="Fechar" type="button">&times;</button>
+      <h2 id="titulo-triagem">Vamos achar o serviço certo</h2>
+      <p class="dica">Três perguntas rápidas. Isto não é um diagnóstico: só ajuda a escolher onde procurar.</p>
+      <div class="pergunta">
+        <p>1. Há risco de alguém se machucar agora?</p>
+        <label><input type="radio" name="risco" value="sim"> Sim</label>
+        <label><input type="radio" name="risco" value="nao" checked> Não</label>
+      </div>
+      <div class="pergunta">
+        <p>2. A pessoa que precisa de ajuda tem menos de 18 anos?</p>
+        <label><input type="radio" name="idade" value="menor"> Sim</label>
+        <label><input type="radio" name="idade" value="adulto" checked> Não</label>
+      </div>
+      <div class="pergunta">
+        <p>3. O sofrimento está ligado ao uso de álcool ou outras drogas?</p>
+        <label><input type="radio" name="substancia" value="sim"> Sim</label>
+        <label><input type="radio" name="substancia" value="nao" checked> Não</label>
+      </div>
+      <button class="botao primario" type="submit">Ver serviços indicados</button>
+    </form>
+  </dialog>
+
+  <!-- Tipos de serviço -->
+  <dialog id="dialogo-tipos" aria-labelledby="titulo-tipos">
+    <div class="dialogo-corpo">
+      <button class="fechar" data-fechar aria-label="Fechar">&times;</button>
+      <h2 id="titulo-tipos">Os serviços de saúde mental do SUS</h2>
+      <p>Os <strong>CAPS (Centros de Atenção Psicossocial)</strong> cuidam de pessoas em sofrimento psíquico intenso. São gratuitos e, em geral, recebem quem chega sem encaminhamento.</p>
+      <ul id="lista-tipos"></ul>
+      <p>Casos mais leves (ansiedade, tristeza persistente, insônia) costumam começar pela <strong>UBS</strong>, que encaminha ao CAPS quando é preciso.</p>
+    </div>
+  </dialog>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+  <script src="/app.js"></script>
+</body>
+</html>

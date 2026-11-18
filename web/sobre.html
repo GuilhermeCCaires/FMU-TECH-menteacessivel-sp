@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sobre os dados — MenteAcessível SP</title>
+  <link rel="icon" href="/icone.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/estilo.css">
+</head>
+<body>
+  <header class="topo">
+    <a class="marca" href="/"><img src="/icone.svg" alt=""><div><strong>MenteAcessível SP</strong><span>Sobre os dados</span></div></a>
+    <nav><a class="botao pequeno" href="/">Início</a></nav>
+  </header>
+  <main style="max-width:760px;margin:0 auto;padding:20px 16px">
+    <div class="cartao">
+      <h2>De onde vêm as informações</h2>
+      <ul>
+        <li><strong>Unidades de saúde:</strong> Cadastro Nacional de Estabelecimentos de Saúde (CNES), do Ministério da Saúde. Entram CAPS, pronto atendimentos e UBS do Estado de São Paulo.</li>
+        <li><strong>População:</strong> Censo Demográfico 2022 do IBGE.</li>
+        <li><strong>Limites dos municípios:</strong> malha territorial do IBGE.</li>
+        <li><strong>Rotas de carro e a pé:</strong> OSRM sobre dados do OpenStreetMap, servidor mantido pela FOSSGIS. Transporte público: Google Maps e Moovit.</li>
+        <li><strong>Mapa de fundo:</strong> OpenStreetMap. Endereços digitados são localizados pelo ViaCEP e pelo Nominatim (OpenStreetMap).</li>
+      </ul>
+      <p id="metadados" class="dica"></p>
+    </div>
+    <div class="cartao">
+      <h2>Limitações</h2>
+      <ul>
+        <li>A modalidade do CAPS (I, II, III, AD, infantojuvenil) é identificada pelo nome cadastrado e pode estar errada.</li>
+        <li>Horários vêm do turno informado no CNES e não são verificados, salvo quando indicado. Ligue antes de ir.</li>
+        <li>Algumas unidades não têm coordenadas no cadastro; nesses casos o ponto fica no centro da cidade.</li>
+      </ul>
+    </div>
+    <div class="cartao">
+      <h2>Privacidade</h2>
+      <p>Não pedimos cadastro, nome ou CPF. Sua localização é usada só para calcular as distâncias.
+        Ao tocar em <strong>Como chegar</strong> (carro ou a pé), o ponto de partida é enviado pelo nosso servidor ao
+        serviço de rotas do OpenStreetMap (routing.openstreetmap.de), sem nenhum dado seu; nós não guardamos a rota.
+        Os links de transporte público abrem o Google Maps ou o Moovit, que têm suas próprias políticas de privacidade. Para os gráficos de demanda, guardamos apenas o município da busca, o perfil escolhido e a hora arredondada. As respostas da triagem não são guardadas.</p>
+    </div>
+    <div class="cartao crise-topo">
+      <h2>Precisa de ajuda agora?</h2>
+      <p>CVV: ligue <a href="tel:188">188</a> (24h, gratuito). Emergência: SAMU <a href="tel:192">192</a>.</p>
+    </div>
+  </main>
+  <script>
+    fetch("/api/status").then((r) => r.json()).then((s) => {
+      const m = s.metadados || {};
+      if (m.competencia_cnes) document.getElementById("metadados").textContent =
+        `Dados do CNES de ${m.competencia_cnes}, coletados em ${m.data_coleta}. ${m.total_unidades} unidades em ${m.total_municipios} municípios.`;
+    }).catch(() => {});
+  </script>
+</body>
+</html>
